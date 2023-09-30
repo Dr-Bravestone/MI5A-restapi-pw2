@@ -50,12 +50,6 @@ class ProdiController extends BaseController
             return $this->sendError('','Data Gagal Disimpan',400);
         }
 
-        // $prodi = new Prodi();
-        // $prodi -> fakultas_id = $validasi['fakultas_id'];
-        // $prodi -> nama_prodi = $validasi['nama_prodi'];
-
-        // $prodi->save();
-        // return redirect() -> route('prodi.index') -> with('success', 'Data berhasil disimpan');
     }
 
     /**
@@ -77,9 +71,23 @@ class ProdiController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Prodi $prodi)
+    public function update(Request $request, $id)
     {
         //
+        $validasi = $request -> validate ([
+            
+            'fakultas_id' => 'required',
+            'nama_prodi' => 'required'
+            
+        ]);
+
+        $result=Prodi::where('id',$id);
+        
+        $result->update($validasi);
+
+        return $this->sendSuccess($result->first(), 'Prodi berhasil diperbarui',201);
+
+
     }
 
     /**
@@ -87,10 +95,10 @@ class ProdiController extends BaseController
      */
     public function destroy($id)
     {
-        $fakultas=Prodi::where('id',$id);
+        $prodi=Prodi::where('id',$id);
 
         
-        if($fakultas->delete()){
+        if($prodi->delete()){
             return $this->sendSuccess([],'Data Program Studi berhasil dihapus',303);
         }else{
             return$this->sendError('','Data Program studi gagal dihapus',400);

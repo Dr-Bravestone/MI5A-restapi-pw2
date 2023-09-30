@@ -58,40 +58,6 @@ class MahasiswaController extends BaseController
         }else{
             return $this->sendError('','Data Gagal Disimpan',400);
         }
-
-        $mahasiswa = new Mahasiswa();
-        $mahasiswa->npm = $validasi['npm'];
-        $mahasiswa->nama = $validasi['nama'];
-        $mahasiswa->tanggal = $validasi['tanggal'];
-        $mahasiswa->prodi_id = $validasi['prodi_id'];
-
-        // upload foto
-
-        $ext = $request -> foto -> getClientOriginalExtension();
-        $new_filename = $validasi['npm'] . '.' . $ext;
-        $request -> foto -> move('public', $new_filename);
-
-        $mahasiswa -> foto = $new_filename;
-        $mahasiswa -> save();
-        // $fileName = time() . '.' . $request->image->extension();
-        // $request->image->storeAs('public/images', $fileName);
-        
-        // $mahasiswa = new Mahasiswa;
-        // $mahasiswa->npm = $request->input('npm');
-        // $mahasiswa->nama = $request->input('nama');
-        // $mahasiswa->tanggal = $request->input('tanggal');
-        // if($request->hasfile('foto'))
-        // {
-        //     $file = $request->file('foto');
-        //     $extention = $file->getClientOriginalExtension();
-        //     $filename = time().'.'.$extention;
-        //     $file->move('public/images/', $filename);
-        //     $mahasiswa->foto = $filename;
-        // }
-        // $mahasiswa->prodi_id = $request-> input('prodi_id');
-        // $mahasiswa->save();
-        
-        return redirect() -> route ('mahasiswa.index') -> with('success', 'Data berhasil disimpan' . $validasi['nama']);  
         
         
     }
@@ -119,29 +85,31 @@ class MahasiswaController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Mahasiswa $mahasiswa)
+    public function update(Request $request,$id)
     {
-        //
         $validasi = $request->validate([
-            'npm' => 'required',
-            'nama' => 'required',
-            'tanggal' => 'required',
-            'foto' => 'required|file|image',
-            'prodi_id' => 'required'
+            // 'npm' => '',
+            'nama' => '',
+            'tanggal' => '',
+            'foto' => 'file|image',
+            'prodi_id' => ''
         ]);
-        // upload foto
 
+        $result=Mahasiswa::where('id',$id);
+
+        if(isset($request->foto)){
         $ext = $request -> foto -> getClientOriginalExtension();
-        $new_filename = $validasi['npm'] . '.' . $ext;
-        $request -> foto -> storeAs('public', $new_filename);
+        $new_filename = $result->first()->npm. '.' . $ext;
+        $file=$request->file('foto');
+        $file -> move('public', $new_filename);
+        $validasi['foto']=$new_filename;
+        }
+        $result->update($validasi);
 
-        $validasi['foto']= $new_filename;
+        return $this->sendSuccess($result->first(), 'Data Mahasiswa ' . $result->first()->nama . ' berhasil diperbarui', 201);
+
+
         
-        Mahasiswa::where('id', $mahasiswa->id) -> update($validasi);
-        $mahasiswa -> foto = $new_filename;
-        $mahasiswa -> save();
-        return redirect() -> route ('mahasiswa.index') -> with('success', 'Data berhasil disimpan' . $validasi['nama']);  
-
         
     }
 
